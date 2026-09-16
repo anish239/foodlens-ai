@@ -1,0 +1,7 @@
+{
+  "name": "FoodLens AI",
+  "description": "Scan. Understand. Eat Smarter. AI-powered food intelligence platform.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
