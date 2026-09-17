@@ -56,6 +56,23 @@ const registerActiveConnectionEvents = () => {
 };
 
 const connectDB = async () => {
+  // 0. Reuse active connection if already connected (e.g. serverless warm container reuse)
+  if (mongoose.connection.readyState === 1) {
+    currentDbInfo.connected = true;
+    return mongoose.connection;
+  }
+  // If connection is currently in progress, wait for it to settle
+  if (mongoose.connection.readyState === 2) {
+    await new Promise((resolve) => {
+      mongoose.connection.once('connected', resolve);
+      mongoose.connection.once('error', resolve);
+    });
+    if (mongoose.connection.readyState === 1) {
+      currentDbInfo.connected = true;
+      return mongoose.connection;
+    }
+  }
+
   const mongoUri = process.env.MONGODB_URI;
 
   // 1. Try primary URI if specified (e.g. Atlas cluster)

@@ -7,6 +7,7 @@ import { notFoundMiddleware } from './middleware/notFoundMiddleware.js';
 import { errorMiddleware } from './middleware/errorMiddleware.js';
 import { apiLimiter } from './middleware/rateLimitMiddleware.js';
 import { requestIdMiddleware } from './middleware/requestIdMiddleware.js';
+import connectDB from './config/db.js';
 
 const app = express();
 
@@ -63,6 +64,38 @@ if (process.env.NODE_ENV !== 'production') {
 
 // JSON Body Parser with bounded size limit (10kb) to prevent DoS
 app.use(express.json({ limit: '10kb' }));
+
+// URL normalization middleware for Vercel Serverless Functions & reverse proxies
+app.use((req, res, next) => {
+  // If Vercel or proxy rewrite transformed req.url to destination (/api or /api/index.js or /)
+  // but req.originalUrl contains the actual client path
+  if (req.originalUrl && req.originalUrl.startsWith('/api') && (!req.url || !req.url.startsWith('/api') || req.url === '/api' || req.url === '/api/index.js')) {
+    req.url = req.originalUrl;
+  }
+  // Strip duplicate /api/api if accidental double prefix occurs
+  if (req.url && req.url.startsWith('/api/api/')) {
+    req.url = req.url.replace('/api/api/', '/api/');
+  }
+  next();
+});
+
+// Serverless database connection middleware ensuring connection before route execution
+app.use('/api', async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    console.error('Database connection error in request handler:', err.message);
+    if (process.env.NODE_ENV === 'production') {
+      return res.status(500).json({
+        success: false,
+        message: 'Database connection failure. Please verify MONGODB_URI configuration in Vercel.',
+        error: { code: 'DATABASE_ERROR' },
+      });
+    }
+    next(err);
+  }
+});
 
 // Global Rate Limiting on API routes
 app.use('/api', apiLimiter);

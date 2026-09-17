@@ -360,9 +360,21 @@ Executes `tsc --noEmit` to verify type safety across all TypeScript modules.
 
 ## Production Build & Deployment
 
-The application is engineered for production deployment on platforms such as Google Cloud Run, Render, AWS, or Docker containers.
+The application is engineered for production deployment on serverless platforms such as Vercel, as well as containerized platforms like Google Cloud Run, Render, AWS, or Docker containers.
 
-### 1. Build the Application
+### Vercel Serverless Deployment
+
+FoodLens AI includes native Vercel Serverless Function support via `/api/index.js` and `vercel.json`:
+
+1. **Deploy Repository to Vercel**: Connect your GitHub repository to Vercel.
+2. **Environment Variables**: Set the following in your Vercel Project Settings (`Settings > Environment Variables`):
+   - `MONGODB_URI`: Your production MongoDB Atlas connection string.
+   - `JWT_SECRET`: A secure random string (minimum 16 characters).
+   - `GEMINI_API_KEY`: (Optional) Your Google Gemini API key for multimodal and nutritional insights.
+   - `NODE_ENV`: Set to `production`.
+3. **Build Configuration**: Vercel automatically detects the Vite frontend build and routes `/api/*` requests to the serverless function export at `api/index.js` with client-side SPA routing fallbacks.
+
+### Container / Server Deployment
 
 ```bash
 npm run build
