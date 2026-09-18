@@ -159,7 +159,7 @@ export const FoodLensScoreCard = ({ scoreData }) => {
                     key={idx}
                     className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold shadow-2xs"
                   >
-                    <span>{item.factor}</span>
+                    <span>{typeof item.factor === 'string' ? item.factor : (item.factor?.name || item.factor?.message || 'Factor')}</span>
                     <span className="text-[11px] font-mono text-emerald-600">+{item.impact}</span>
                   </span>
                 ))}
@@ -178,7 +178,7 @@ export const FoodLensScoreCard = ({ scoreData }) => {
                     key={idx}
                     className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-rose-50 text-rose-800 border border-rose-200 text-xs font-bold shadow-2xs"
                   >
-                    <span>{item.factor}</span>
+                    <span>{typeof item.factor === 'string' ? item.factor : (item.factor?.name || item.factor?.message || 'Factor')}</span>
                     <span className="text-[11px] font-mono text-rose-600">{item.impact}</span>
                   </span>
                 ))}
@@ -214,17 +214,19 @@ export const FoodLensScoreCard = ({ scoreData }) => {
                   ) : (
                     <Info className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
                   )}
-                  <span className="font-bold text-slate-800 truncate">{item.factor}</span>
+                  <span className="font-bold text-slate-800 truncate">
+                    {typeof item.factor === 'string' ? item.factor : (item.factor?.name || item.factor?.message || 'Factor')}
+                  </span>
                   {item.value !== null && (
                     <span className="text-[11px] text-slate-400 hidden sm:inline">
-                      ({item.value} {item.unit || ''})
+                      ({typeof item.value === 'object' ? (item.value.value ?? '') : item.value} {item.unit || ''})
                     </span>
                   )}
                 </div>
 
                 <div className="flex items-center gap-2.5 flex-shrink-0">
                   <span className="text-[11px] text-slate-500 hidden md:inline truncate max-w-[150px]">
-                    {item.reason}
+                    {typeof item.reason === 'string' ? item.reason : (item.reason?.message || '')}
                   </span>
                   <span
                     className={`font-mono font-bold px-2 py-0.5 rounded-lg text-xs ${

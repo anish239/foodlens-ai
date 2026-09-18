@@ -93,8 +93,50 @@ export const ProductComparisonTable = ({ comparisonData, onRemoveProduct }) => {
   };
 
   const formatNutrient = (value, unit = 'g') => {
-    if (value == null || isNaN(value)) return '—';
+    if (value == null) return '—';
+    if (typeof value === 'object') {
+      const num = value.value ?? value.amount;
+      if (num == null || isNaN(num)) return '—';
+      const u = value.unit || unit;
+      return `${Number(num).toFixed(1).replace(/\.0$/, '')} ${u}`;
+    }
+    if (isNaN(value)) return '—';
     return `${Number(value).toFixed(1).replace(/\.0$/, '')} ${unit}`;
+  };
+
+  const getPositives = (score) => {
+    if (!score) return [];
+    if (Array.isArray(score.breakdown?.positives)) return score.breakdown.positives;
+    if (Array.isArray(score.breakdown)) return score.breakdown.filter((item) => item && item.impact > 0);
+    if (Array.isArray(score.positives)) return score.positives;
+    return [];
+  };
+
+  const getConcerns = (score) => {
+    if (!score) return [];
+    if (Array.isArray(score.breakdown?.concerns)) return score.breakdown.concerns;
+    if (Array.isArray(score.breakdown)) return score.breakdown.filter((item) => item && item.impact < 0);
+    if (Array.isArray(score.concerns)) return score.concerns;
+    return [];
+  };
+
+  const getConflicts = (compatibility) => {
+    if (!compatibility) return [];
+    if (Array.isArray(compatibility.conflicts)) return compatibility.conflicts;
+    if (Array.isArray(compatibility.reasons)) return compatibility.reasons;
+    return [];
+  };
+
+  const getWarnings = (compatibility) => {
+    if (!compatibility) return [];
+    if (Array.isArray(compatibility.warnings)) return compatibility.warnings;
+    return [];
+  };
+
+  const getItemText = (item, fallback = '') => {
+    if (!item) return fallback;
+    if (typeof item === 'string') return item;
+    return item.message || item.reason || item.allergen || item.matchedValue || item.text || item.factor || fallback;
   };
 
   return (
@@ -194,7 +236,9 @@ export const ProductComparisonTable = ({ comparisonData, onRemoveProduct }) => {
                     </div>
                     {score?.breakdown && (
                       <p className="text-[11px] text-slate-500 mt-1 font-medium">
-                        Base: 100 • Deductions: -{score.breakdown.deductions?.total || 0}
+                        Base: 100 • Deductions: -{Array.isArray(score.breakdown)
+                          ? Math.abs(score.breakdown.filter((f) => f && f.impact < 0).reduce((acc, f) => acc + f.impact, 0))
+                          : (score.breakdown.deductions?.total || 0)}
                       </p>
                     )}
                   </div>
@@ -206,44 +250,50 @@ export const ProductComparisonTable = ({ comparisonData, onRemoveProduct }) => {
               <div className="p-5 bg-slate-50/50 font-bold text-xs text-slate-700">
                 Key Positives
               </div>
-              {products.map(({ product, score }) => (
-                <div key={product.barcode} className="p-5 text-xs text-slate-600 font-medium">
-                  {score?.breakdown?.positives?.length > 0 ? (
-                    <ul className="space-y-1.5">
-                      {score.breakdown.positives.map((pos, idx) => (
-                        <li key={idx} className="flex items-start gap-1.5 text-emerald-800 text-xs">
-                          <span className="text-emerald-500 font-black">•</span>
-                          <span>{pos.reason || pos}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <span className="text-slate-400 text-xs">None identified</span>
-                  )}
-                </div>
-              ))}
+              {products.map(({ product, score }) => {
+                const positives = getPositives(score);
+                return (
+                  <div key={product.barcode} className="p-5 text-xs text-slate-600 font-medium">
+                    {positives.length > 0 ? (
+                      <ul className="space-y-1.5">
+                        {positives.map((pos, idx) => (
+                          <li key={idx} className="flex items-start gap-1.5 text-emerald-800 text-xs">
+                            <span className="text-emerald-500 font-black">•</span>
+                            <span>{getItemText(pos, 'Favorable nutrient profile')}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <span className="text-slate-400 text-xs">None identified</span>
+                    )}
+                  </div>
+                );
+              })}
             </div>
 
             <div className="grid grid-cols-[200px_repeat(auto-fit,minmax(220px,1fr))] border-b border-slate-200 divide-x divide-slate-200 min-w-[750px]">
               <div className="p-5 bg-slate-50/50 font-bold text-xs text-slate-700">
                 Nutritional Concerns
               </div>
-              {products.map(({ product, score }) => (
-                <div key={product.barcode} className="p-5 text-xs text-slate-600 font-medium">
-                  {score?.breakdown?.concerns?.length > 0 ? (
-                    <ul className="space-y-1.5">
-                      {score.breakdown.concerns.map((con, idx) => (
-                        <li key={idx} className="flex items-start gap-1.5 text-rose-800 text-xs">
-                          <span className="text-rose-500 font-black">•</span>
-                          <span>{con.reason || con}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <span className="text-emerald-700 text-xs font-bold">No major concerns</span>
-                  )}
-                </div>
-              ))}
+              {products.map(({ product, score }) => {
+                const concerns = getConcerns(score);
+                return (
+                  <div key={product.barcode} className="p-5 text-xs text-slate-600 font-medium">
+                    {concerns.length > 0 ? (
+                      <ul className="space-y-1.5">
+                        {concerns.map((con, idx) => (
+                          <li key={idx} className="flex items-start gap-1.5 text-rose-800 text-xs">
+                            <span className="text-rose-500 font-black">•</span>
+                            <span>{getItemText(con, 'Nutritional deduction')}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <span className="text-emerald-700 text-xs font-bold">No major concerns</span>
+                    )}
+                  </div>
+                );
+              })}
             </div>
 
             {/* 3. SECTION: DIETARY COMPATIBILITY */}
@@ -261,7 +311,9 @@ export const ProductComparisonTable = ({ comparisonData, onRemoveProduct }) => {
                   <div>{getCompatibilityBadge(compatibility)}</div>
                   {compatibility?.summary && (
                     <p className="text-xs text-slate-600 mt-2.5 line-clamp-2 font-medium">
-                      {compatibility.summary}
+                      {typeof compatibility.summary === 'string'
+                        ? compatibility.summary
+                        : (compatibility.summary?.message || '')}
                     </p>
                   )}
                 </div>
@@ -272,31 +324,37 @@ export const ProductComparisonTable = ({ comparisonData, onRemoveProduct }) => {
               <div className="p-5 bg-slate-50/50 font-bold text-xs text-slate-700">
                 Dietary Conflicts &amp; Warnings
               </div>
-              {products.map(({ product, compatibility }) => (
-                <div key={product.barcode} className="p-5 text-xs text-slate-600 font-medium">
-                  {compatibility?.conflicts?.length > 0 || compatibility?.warnings?.length > 0 ? (
-                    <div className="space-y-1.5">
-                      {compatibility.conflicts?.map((conf, idx) => (
-                        <div key={idx} className="text-rose-800 text-xs font-bold flex items-center gap-1.5">
-                          <XCircle className="w-3.5 h-3.5 text-rose-500 shrink-0" />
-                          <span>{conf.reason || conf.allergen || conf}</span>
-                        </div>
-                      ))}
-                      {compatibility.warnings?.map((warn, idx) => (
-                        <div key={idx} className="text-amber-800 text-xs font-medium flex items-center gap-1.5">
-                          <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                          <span>{warn.reason || warn}</span>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <span className="text-emerald-800 text-xs font-bold flex items-center gap-1.5">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                      Fits all configured preferences
-                    </span>
-                  )}
-                </div>
-              ))}
+              {products.map(({ product, compatibility }) => {
+                const conflicts = getConflicts(compatibility);
+                const warnings = getWarnings(compatibility);
+                const hasIssues = conflicts.length > 0 || warnings.length > 0;
+
+                return (
+                  <div key={product.barcode} className="p-5 text-xs text-slate-600 font-medium">
+                    {hasIssues ? (
+                      <div className="space-y-1.5">
+                        {conflicts.map((conf, idx) => (
+                          <div key={idx} className="text-rose-800 text-xs font-bold flex items-center gap-1.5">
+                            <XCircle className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                            <span>{getItemText(conf, 'Dietary conflict detected')}</span>
+                          </div>
+                        ))}
+                        {warnings.map((warn, idx) => (
+                          <div key={idx} className="text-amber-800 text-xs font-medium flex items-center gap-1.5">
+                            <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                            <span>{getItemText(warn, 'Dietary warning detected')}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="text-emerald-800 text-xs font-bold flex items-center gap-1.5">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                        Fits all configured preferences
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
             </div>
 
             {/* 4. SECTION: NUTRITION FACTS */}
@@ -417,7 +475,7 @@ export const ProductComparisonTable = ({ comparisonData, onRemoveProduct }) => {
                           key={idx}
                           className="px-2.5 py-1 rounded-xl bg-rose-50 text-rose-800 border border-rose-200 text-xs font-bold"
                         >
-                          {a}
+                          {getItemText(a, 'Allergen')}
                         </span>
                       ))}
                     </div>

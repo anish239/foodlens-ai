@@ -86,7 +86,7 @@ export const CompatibilityBadge = ({ compatibilityData }) => {
                 className="flex items-start gap-2 bg-white/80 px-3 py-1.5 rounded-xl border border-rose-100 text-rose-900"
               >
                 <span className="font-bold text-rose-600">•</span>
-                <span>{r.message}</span>
+                <span>{typeof r === 'string' ? r : (r?.message || r?.reason || r?.allergen || 'Dietary conflict detected')}</span>
               </li>
             ))}
           </ul>
@@ -106,7 +106,7 @@ export const CompatibilityBadge = ({ compatibilityData }) => {
                 className="flex items-start gap-2 bg-white/80 px-3 py-1.5 rounded-xl border border-amber-100 text-amber-900"
               >
                 <span className="font-bold text-amber-600">!</span>
-                <span>{w.message}</span>
+                <span>{typeof w === 'string' ? w : (w?.message || w?.reason || 'Dietary warning detected')}</span>
               </li>
             ))}
           </ul>
@@ -126,7 +126,7 @@ export const CompatibilityBadge = ({ compatibilityData }) => {
                 className="flex items-start gap-2 bg-white/80 px-3 py-1.5 rounded-xl border border-emerald-100 text-emerald-900"
               >
                 <span className="font-bold text-emerald-600">✓</span>
-                <span>{p.message}</span>
+                <span>{typeof p === 'string' ? p : (p?.message || p?.reason || 'Preference aligned')}</span>
               </li>
             ))}
           </ul>

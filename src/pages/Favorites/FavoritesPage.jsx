@@ -112,7 +112,7 @@ export const FavoritesPage = () => {
         <Card className="p-4 rounded-2xl bg-rose-50 border-rose-200 text-rose-800 text-xs flex items-center justify-between">
           <div className="flex items-center gap-2">
             <AlertCircle className="w-4 h-4 text-rose-600" />
-            <span className="font-semibold">{error}</span>
+            <span className="font-semibold">{typeof error === 'string' ? error : (error?.message || 'Failed to load favorites')}</span>
           </div>
           <Button
             variant="ghost"

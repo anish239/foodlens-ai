@@ -58,7 +58,7 @@ export const ProductSearchCard = ({ product }) => {
       {toastMessage && (
         <div className="absolute top-3 inset-x-3 z-30 bg-slate-900/95 text-white text-xs px-3.5 py-2 rounded-xl flex items-center gap-2 shadow-xl backdrop-blur-sm animate-in fade-in duration-200">
           <AlertCircle className="w-4 h-4 shrink-0 text-amber-400" />
-          <span className="font-medium">{toastMessage}</span>
+          <span className="font-medium">{typeof toastMessage === 'string' ? toastMessage : (toastMessage?.message || '')}</span>
         </div>
       )}
 

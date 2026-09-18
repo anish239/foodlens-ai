@@ -7,6 +7,7 @@ import productRoutes from './productRoutes.js';
 import historyRoutes from './historyRoutes.js';
 import favoriteRoutes from './favoriteRoutes.js';
 import analyticsRoutes from './analyticsRoutes.js';
+import analysisRoutes from './analysisRoutes.js';
 
 const router = express.Router();
 
@@ -15,6 +16,7 @@ router.use('/health', healthRoutes);
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
 router.use('/products', productRoutes);
+router.use('/analysis', analysisRoutes);
 router.use('/history', historyRoutes);
 router.use('/favorites', favoriteRoutes);
 router.use('/analytics', analyticsRoutes);

@@ -155,7 +155,9 @@ export const ProductDetailsPage = () => {
     );
   }
 
-  if (isNotFound || (!product && error?.toLowerCase().includes('not found'))) {
+  const errorMessageStr = typeof error === 'string' ? error : (error?.message || '');
+
+  if (isNotFound || (!product && errorMessageStr.toLowerCase().includes('not found'))) {
     return (
       <ProductNotFoundState
         barcode={id}
@@ -179,7 +181,7 @@ export const ProductDetailsPage = () => {
         <div>
           <h2 className="text-2xl font-black text-slate-900">Unable to Load Product</h2>
           <p className="text-sm text-slate-500 mt-2 font-medium">
-            {error || "We couldn't load product data at this time."}
+            {errorMessageStr || "We couldn't load product data at this time."}
           </p>
         </div>
         <div className="flex justify-center gap-3">

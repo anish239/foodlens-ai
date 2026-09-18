@@ -162,4 +162,75 @@ if (savedApiKey) {
   process.env.GEMINI_API_KEY = savedApiKey;
 }
 
+// Test 11: Image analysis validator test
+import { validateAndNormalizeImageAnalysisResponse } from '../utils/aiResponseValidator.js';
+import { generateDeterministicImageAnalysis, analyzeFoodImage } from '../services/geminiService.js';
+
+const validImageAnalysisRaw = {
+  productName: 'Avocado Toast with Poached Egg',
+  brand: '',
+  category: 'Prepared Breakfast',
+  summary: 'A wholesome nutrient-dense breakfast dish high in healthy monounsaturated fats.',
+  identifiedIngredients: ['Whole grain sourdough', 'Fresh avocado', 'Poached egg', 'Chili flakes'],
+  detectedAllergens: ['Egg', 'Wheat/Gluten'],
+  estimatedNutrition: {
+    calories: '340 kcal',
+    protein: '14g',
+    carbs: '28g',
+    fat: '18g',
+    sugar: '2g',
+    sodium: '290mg',
+  },
+  highlights: ['Rich in monounsaturated fats', 'Good protein content', 'High dietary fiber'],
+  concerns: ['Contains gluten and egg allergens'],
+  healthScore: 84,
+  recommendation: 'Excellent balanced meal.',
+  disclaimer: DEFAULT_AI_DISCLAIMER,
+};
+
+const res11 = validateAndNormalizeImageAnalysisResponse(validImageAnalysisRaw);
+assert.strictEqual(res11.productName, 'Avocado Toast with Poached Egg');
+assert.strictEqual(res11.healthScore, 84);
+assert.strictEqual(res11.identifiedIngredients.length, 4);
+assert.strictEqual(res11.detectedAllergens.length, 2);
+assert.strictEqual(res11.estimatedNutrition.calories, '340 kcal');
+console.log('✓ Test 11 Passed: validateAndNormalizeImageAnalysisResponse validates structured response');
+
+// Test 12: Deterministic image analysis generation
+const detImageRes = generateDeterministicImageAnalysis({ analysisType: 'image' });
+assert.ok(detImageRes.productName.length > 0);
+assert.ok(detImageRes.healthScore >= 1 && detImageRes.healthScore <= 100);
+assert.strictEqual(detImageRes.source, 'deterministic-engine');
+
+const detLabelRes = generateDeterministicImageAnalysis({ analysisType: 'label' });
+assert.ok(detLabelRes.productName.includes('Label') || detLabelRes.category.includes('Food'));
+assert.strictEqual(detLabelRes.source, 'deterministic-engine');
+console.log('✓ Test 12 Passed: generateDeterministicImageAnalysis produces valid food and label data');
+
+// Test 13: analyzeFoodImage fallback without API key
+delete process.env.GEMINI_API_KEY;
+const testBase64 = Buffer.from('fake-image-bytes').toString('base64');
+const analyzedRes = await analyzeFoodImage({
+  imageBase64: testBase64,
+  mimeType: 'image/jpeg',
+  analysisType: 'image',
+});
+assert.ok(analyzedRes.productName.length > 0);
+assert.ok(analyzedRes.highlights.length > 0);
+assert.strictEqual(analyzedRes.source, 'deterministic-engine');
+console.log('✓ Test 13 Passed: analyzeFoodImage falls back gracefully without GEMINI_API_KEY');
+
+// Test 14: analyzeFoodImage rejects invalid input
+try {
+  await analyzeFoodImage({ imageBase64: '' });
+  assert.fail('Expected error for empty imageBase64');
+} catch (err) {
+  assert.strictEqual(err.statusCode, 400);
+  console.log('✓ Test 14 Passed: analyzeFoodImage rejects empty image data');
+}
+
+if (savedApiKey) {
+  process.env.GEMINI_API_KEY = savedApiKey;
+}
+
 console.log('All Gemini AI Service & Validator unit tests passed successfully!');

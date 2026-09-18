@@ -120,14 +120,14 @@ export const ProfilePage = () => {
       {successMessage && (
         <Card className="p-4 rounded-2xl bg-emerald-50 border-emerald-200 text-emerald-800 text-xs flex items-center gap-2 font-semibold">
           <Check className="w-4 h-4 flex-shrink-0 text-emerald-600" />
-          <span>{successMessage}</span>
+          <span>{typeof successMessage === 'string' ? successMessage : (successMessage?.message || 'Saved successfully')}</span>
         </Card>
       )}
 
       {error && (
         <Card className="p-4 rounded-2xl bg-rose-50 border-rose-200 text-rose-800 text-xs flex items-center gap-2 font-semibold">
           <AlertCircle className="w-4 h-4 flex-shrink-0 text-rose-600" />
-          <span>{error}</span>
+          <span>{typeof error === 'string' ? error : (error?.message || 'An error occurred')}</span>
         </Card>
       )}
 

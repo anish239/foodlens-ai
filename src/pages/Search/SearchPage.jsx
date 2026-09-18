@@ -174,7 +174,9 @@ export const SearchPage = () => {
             <AlertCircle className="w-6 h-6" />
           </div>
           <h3 className="font-bold text-slate-900 text-base mb-1">Search Encountered an Issue</h3>
-          <p className="text-sm text-slate-600 max-w-md mx-auto mb-4 font-medium">{errorMessage}</p>
+          <p className="text-sm text-slate-600 max-w-md mx-auto mb-4 font-medium">
+            {typeof errorMessage === 'string' ? errorMessage : (errorMessage?.message || 'Search encountered an error. Please try again.')}
+          </p>
           <Button
             variant="outline"
             size="sm"

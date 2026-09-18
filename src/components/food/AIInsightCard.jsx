@@ -56,7 +56,7 @@ export const AIInsightCard = ({ insightData, loading = false, error = null, onRe
           )}
         </div>
         <p className="text-xs text-slate-500 leading-relaxed font-medium">
-          {error || 'Unable to generate Gemini AI insights at this moment. Deterministic product details and FoodLens scores remain fully accessible.'}
+          {typeof error === 'string' ? error : (error?.message || 'Unable to generate Gemini AI insights at this moment. Deterministic product details and FoodLens scores remain fully accessible.')}
         </p>
       </Card>
     );
@@ -75,6 +75,12 @@ export const AIInsightCard = ({ insightData, loading = false, error = null, onRe
     recommendation,
     disclaimer,
   } = insightData;
+
+  const getText = (val) => {
+    if (!val) return '';
+    if (typeof val === 'string') return val;
+    return val.message || val.text || val.reason || '';
+  };
 
   return (
     <Card className="p-6 sm:p-7 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 text-white border-slate-800 shadow-xl rounded-3xl space-y-6">
@@ -107,7 +113,7 @@ export const AIInsightCard = ({ insightData, loading = false, error = null, onRe
       {summary && (
         <div className="space-y-1.5 bg-slate-800/60 p-4 rounded-2xl border border-slate-700/60">
           <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider">Product Summary</h4>
-          <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-normal">{summary}</p>
+          <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-normal">{getText(summary)}</p>
         </div>
       )}
 
@@ -123,7 +129,7 @@ export const AIInsightCard = ({ insightData, loading = false, error = null, onRe
               {highlights.map((h, idx) => (
                 <li key={idx} className="flex items-start gap-2">
                   <span className="font-bold text-emerald-400">•</span>
-                  <span>{h}</span>
+                  <span>{getText(h)}</span>
                 </li>
               ))}
             </ul>
@@ -140,7 +146,7 @@ export const AIInsightCard = ({ insightData, loading = false, error = null, onRe
               {concerns.map((c, idx) => (
                 <li key={idx} className="flex items-start gap-2">
                   <span className="font-bold text-amber-400">•</span>
-                  <span>{c}</span>
+                  <span>{getText(c)}</span>
                 </li>
               ))}
             </ul>
@@ -155,7 +161,7 @@ export const AIInsightCard = ({ insightData, loading = false, error = null, onRe
             <Info className="w-4 h-4 text-emerald-400" />
             <span>Why This FoodLens Score?</span>
           </div>
-          <p className="text-xs text-slate-300 leading-relaxed">{scoreExplanation}</p>
+          <p className="text-xs text-slate-300 leading-relaxed">{getText(scoreExplanation)}</p>
         </div>
       )}
 
@@ -166,7 +172,7 @@ export const AIInsightCard = ({ insightData, loading = false, error = null, onRe
             <HelpCircle className="w-4 h-4 text-emerald-400" />
             <span>Dietary & Profile Compatibility</span>
           </div>
-          <p className="text-xs text-slate-300 leading-relaxed">{compatibilityExplanation}</p>
+          <p className="text-xs text-slate-300 leading-relaxed">{getText(compatibilityExplanation)}</p>
         </div>
       )}
 
@@ -175,7 +181,7 @@ export const AIInsightCard = ({ insightData, loading = false, error = null, onRe
         <div className="p-4 rounded-2xl bg-emerald-950/30 border border-emerald-800/40 space-y-1">
           <h4 className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Overall Insight</h4>
           <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-medium italic">
-            "{recommendation}"
+            "{getText(recommendation)}"
           </p>
         </div>
       )}

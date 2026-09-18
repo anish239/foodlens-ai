@@ -690,7 +690,9 @@ export const ScannerPage = () => {
             <Alert variant="destructive" className="rounded-2xl flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <AlertCircle className="w-4 h-4" />
-                <AlertDescription className="font-medium text-xs">{error}</AlertDescription>
+                <AlertDescription className="font-medium text-xs">
+                  {typeof error === 'string' ? error : (error?.message || 'An error occurred during barcode lookup.')}
+                </AlertDescription>
               </div>
               <Button
                 variant="ghost"
@@ -709,7 +711,9 @@ export const ScannerPage = () => {
               <div className="flex items-start sm:items-center gap-3">
                 <AlertCircle className="w-5 h-5 flex-shrink-0 text-amber-600 mt-0.5 sm:mt-0" />
                 <div>
-                  <AlertTitle className="font-bold text-xs">{cameraError}</AlertTitle>
+                  <AlertTitle className="font-bold text-xs">
+                    {typeof cameraError === 'string' ? cameraError : (cameraError?.message || 'Camera Error')}
+                  </AlertTitle>
                   <p className="text-[11px] text-amber-800 mt-0.5 font-medium">
                     {cameraErrorType === 'NOT_ALLOWED'
                       ? 'Camera permissions can be enabled in your browser or device site settings.'
@@ -915,7 +919,7 @@ export const ScannerPage = () => {
                     <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-medium flex items-start gap-2.5 animate-fade-in">
                       <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-rose-600" />
                       <div>
-                        <span className="font-bold">{manualError}</span>
+                        <span className="font-bold">{typeof manualError === 'string' ? manualError : (manualError?.message || 'Invalid barcode')}</span>
                         <p className="text-[11px] text-rose-700 mt-0.5">
                           Standard retail packaging codes use 12 digits (UPC-A), 13 digits (EAN-13), or 8 digits (EAN-8) with a mathematical check digit.
                         </p>

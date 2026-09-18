@@ -155,7 +155,7 @@ export const ManualProductModal = ({ isOpen, onClose, initialBarcode = '', onSuc
           {error && (
             <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-medium flex items-center gap-2">
               <AlertCircle className="w-4 h-4 flex-shrink-0 text-rose-600" />
-              <span>{error}</span>
+              <span>{typeof error === 'string' ? error : (error?.message || 'Please check form input')}</span>
             </div>
           )}
 

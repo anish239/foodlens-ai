@@ -63,7 +63,7 @@ export const LoginPage = () => {
           {error && (
             <div className="mb-6 p-3.5 rounded-2xl bg-rose-950/60 border border-rose-800/80 text-rose-300 text-xs flex items-center gap-2.5 font-medium">
               <AlertCircle className="w-4 h-4 flex-shrink-0 text-rose-400" />
-              <span>{error}</span>
+              <span>{typeof error === 'string' ? error : (error?.message || 'Invalid email or password')}</span>
             </div>
           )}
 
